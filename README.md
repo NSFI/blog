@@ -25,4 +25,10 @@ $ hexo server
 $ hexo g
 ```
 
+### 部署到服务器
+``` bash
+$ hexo d
+```
+为了保证统一，部署之前最好将代码推到github库中去以后再执行`hexo d`。
+
 More info: [hexo文档](https://hexo.io/zh-cn/docs/index.html)

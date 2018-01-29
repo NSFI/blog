@@ -21,7 +21,7 @@ permalink_d:efaults:
 
 # Directory
 source_dir: source
-public_dir: docs
+public_dir: public
 tag_dir: tags
 archive_dir: archives
 category_dir: categories
@@ -78,3 +78,7 @@ theme: next
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
+deploy:
+  type: git
+  repo: https://github.com/NSFI/blog.git
+  branch: gh-pages
