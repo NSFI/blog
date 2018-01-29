@@ -2,6 +2,8 @@
 title: Nodejs实现静态资源服务器
 date: 2017-12-18 11:19:24
 tags:
+     - 刘宵静
+     - Nodejs
 ---
 
 >Nodejs构建静态服务器需要考虑的几个点：

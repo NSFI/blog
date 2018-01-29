@@ -1,7 +1,9 @@
 ---
 title: 'JavaScript运行机制:事件驱动编程详解'
 date: 2018-01-29 00:27:35
-tags:
+tags: 
+    - 亮哥
+    - javaScript
 ---
 
 # 先看一个例子
