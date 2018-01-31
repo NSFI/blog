@@ -4,6 +4,7 @@ date: 2018-01-29 00:27:35
 tags: 
     - 亮哥
     - javaScript
+author: 亮哥
 ---
 
 # 先看一个例子

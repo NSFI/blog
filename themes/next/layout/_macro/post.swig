@@ -67,6 +67,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               {% if theme.post_meta.item_text %}
+                <span class="post-meta-item-text">{{ post.author | default(config.author) }}</span>
                 <span class="post-meta-item-text">{{ __('post.posted') }}</span>
               {% endif %}
               <time title="{{ __('post.created') }}" itemprop="dateCreated datePublished" datetime="{{ moment(post.date).format() }}">
@@ -90,7 +91,11 @@
               </time>
             {% endif %}
           </span>
-
+          <div>
+            {% for tag in post.tags %}
+              <a href="{{ url_for(tag.path) }}" rel="tag"># {{ tag.name }}</a>
+            {% endfor %}
+          </div>
           {% if post.categories and post.categories.length and theme.post_meta.categories %}
             <span class="post-category" >
             {% if theme.post_meta.created_at or theme.post_meta.updated_at %}
