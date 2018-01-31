@@ -320,106 +320,15 @@
       
         
           
-            <h1 id="先看一个例子"><a href="#先看一个例子" class="headerlink" title="先看一个例子"></a>先看一个例子</h1><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123; <span class="built_in">console</span>.log(<span class="number">1</span>) &#125;, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span>(<span class="params">resolve</span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="number">2</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">10000</span>; i++) &#123;</span><br><span class="line">            i == <span class="number">9999</span> &amp;&amp; resolve();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="number">3</span>);</span><br><span class="line">    &#125;).then(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="number">4</span>);</span><br><span class="line">        <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span>(<span class="params">resolve</span>) </span>&#123;</span><br><span class="line">            setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">                resolve();</span><br><span class="line">                <span class="built_in">console</span>.log(<span class="number">5</span>);</span><br><span class="line">            &#125;, <span class="number">0</span>);</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="number">6</span>);</span><br><span class="line">        &#125;).then(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="number">7</span>);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">8</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">9</span>;</span><br><span class="line">&#125;)()</span><br></pre></td></tr></table></figure>
-<p>在这个例子中，有setTimeout、Promise、回调函数以及函数返回值等等，那么控制台当中会以一个什么顺序打印这些数字呢？现在不知道答案很正常，不妨先思考一下，带着问题看下面的内容。</p>
-<h1 id="阻塞与线程"><a href="#阻塞与线程" class="headerlink" title="阻塞与线程"></a>阻塞与线程</h1><p><strong>在搞清楚JavaScript运行机制之前，我们需要了解什么是阻塞，什么是线程。</strong></p>
-<p>大学我们学《操作系统》这门课程，里面详细的讲述了进程、线程的概念，以及操作系统进程调度相关的内容，线程在执行中如果遇到磁盘读写或者网络通信(统称为I/O操作)，通常要耗费较长的时间，这是操作系统会剥夺这个线程的CPU控制权，使其暂停执行，同时将资源让给其他的工作线程，这种线程的调度方式称为<strong><em>阻塞</em></strong>。当I/O操作结束，操作系统将这个线程的阻塞状态解除，恢复其对CPU的控制权，令其继续执行。这种I/O模式就是我们通常说的<strong><em>同步式I/O</em></strong>。</p>
-<p>相应地，<strong><em>异步式I/O</em></strong>是针对上述的I/O操作，不采用阻塞模式，当线程遇到I/O操作时，不会以阻塞的方式等待I/O操作的结束，而只是将I/O操作请求发送给操作系统，然后继续执行下一条语句。当操作系统完成I/O操作，以事件的形式通知执行I/O操作的线程，线程会在特定的时间处理这个事件，可见使用异步式I/O，<strong>单线程即可胜任</strong>。这里提到了异步式I/O的一个重要的概念：<strong>事件</strong>！这也是我们这篇文章要讨论的核心。</p>
-<p><strong>接下来我们看看异步式I/O和同步式I/O到底有什么区别？</strong></p>
-<p>我们知道，一个线程同时只能处理一项任务，并且I/O操作往往比CPU计算要耗时得多，所以在同步式I/O模式下，当I/O操作执行时，线程被阻塞，CPU处于空闲的状态，如果要提高CPU的利用率，必须通过多线程，一个线程因为同步式I/O被阻塞了，还有其它线程在工作，多线程可以让CPU资源不被阻塞中的线程浪费，这也是众多多线程语言采用的模式。既然<strong>多线程+同步式I/O</strong>也能提高CPU的吞吐量，我们为什么还要讨论<strong>异步式I/O+事件循环</strong>的模式呢？在回答这个问题之前，我们先看两张图：</p>
-<p><img src="/blog/2018/01/29/JavaScript运行机制-事件驱动编程详解/1.jpg" alt="">左：多线程同步式I/O 右：单线程异步式I/O</p>
-<p>上图分别是同步式I/O+多线程和异步式I/O+事件循环的示意图。假设我们有一个任务，可以分为两个计算部分和一个I/O部分。现在我们要完成5项这个任务。</p>
-<p>同步式I/O+多线程模式如左图所示，5项任务分别由5个线程来完成，从CPU的维度来看，CPU</p>
-<p>先分配给线程1进行计算1</p>
-<ol>
-<li>-&gt; 分配给线程2进行计算1</li>
-<li>-&gt; 分配给线程3进行计算1</li>
-<li>-&gt; 分配给线程4进行计算1</li>
-<li>-&gt; 分配给线程5进行计算1</li>
-</ol>
-<p>至此5个任务的计算1都已完成，然后任务1的I/O操作结束，CPU又</p>
-<p>分配给线程1进行计算2</p>
-<ol>
-<li>-&gt; 分配给线程2进行计算2</li>
-<li>-&gt; 分配给线程3进行计算2</li>
-<li>-&gt; 分配给线程4进行计算2</li>
-<li>-&gt; 分配给线程5进行计算2 。</li>
-</ol>
-<p>最后完成5项任务。</p>
-<p>再看右图，CPU可以一直在一个线程上完成所有计算，执行的顺序和效果和多线程并无差别，可见，单线程事件驱动的异步式 I/O 比传统的多线程同步式I/O，少了多线程的开销，对于操作系统来说，创建一个线程的代价是非常昂贵的：需要给它分配内存、列入调度、在线程切换时还要执行内存换页、清空CPU缓存等等。说到这里，异步式I/O+事件循环模式的好处不言而喻了，如下列表，简单介绍了两种模式的特点。</p>
-<p><img src="/blog/2018/01/29/JavaScript运行机制-事件驱动编程详解/2.jpg" alt=""><br>同步式I/O和异步式I/O的特点</p>
-<p>当然，异步式I/O+事件循环模式也不是没有它的缺点，因为编码都需要是异步的，不符合人们一般的程序设计思维，容易让控制流变得晦涩难懂，给编码和调试都带来不小的困难。前端工程师一直被异步的回调和函数嵌套所困扰，不过在社区以及大牛的努力之下，越来越多的解决方案以及标准逐步完成，例如ES6中的Promise、ES2017中的async/await等等，网上有很多<a href="http://es6.ruanyifeng.com/#docs/async" target="_blank" rel="noopener">详细介绍的资料</a>，我们不展开介绍。</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//异步回调嵌套</span></span><br><span class="line">$.get(<span class="string">'url'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">data</span>) </span>&#123;</span><br><span class="line">    $.get(<span class="string">'url1'</span>, data,</span><br><span class="line">        <span class="function"><span class="keyword">function</span>(<span class="params">data1</span>) </span>&#123;</span><br><span class="line">            $.get(<span class="string">'url2'</span>, data1, <span class="function"><span class="keyword">function</span>(<span class="params">data2</span>) </span>&#123;</span><br><span class="line">                <span class="built_in">console</span>.log(data2);</span><br><span class="line">            &#125;, <span class="string">'json'</span>);</span><br><span class="line">        &#125;, <span class="string">'json'</span>);</span><br><span class="line">&#125;, <span class="string">'json'</span>);</span><br><span class="line"><span class="comment">//用async和await的实现</span></span><br><span class="line"><span class="keyword">var</span> asyncGetdata = <span class="keyword">async</span> <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> data = <span class="keyword">await</span> $.get(<span class="string">'url'</span>);</span><br><span class="line">    <span class="keyword">var</span> data1 = <span class="keyword">await</span> $.get(<span class="string">'url1'</span>, data);</span><br><span class="line">    <span class="keyword">var</span> data2 = <span class="keyword">await</span> $.get(<span class="string">'url2'</span>, data1);</span><br><span class="line">    <span class="built_in">console</span>.log(data2);</span><br><span class="line">&#125;;</span><br><span class="line">asyncGetdata();</span><br></pre></td></tr></table></figure>
-<h1 id="JavaScript运行机制：消息队列和事件循环"><a href="#JavaScript运行机制：消息队列和事件循环" class="headerlink" title="JavaScript运行机制：消息队列和事件循环"></a>JavaScript运行机制：消息队列和事件循环</h1><p>我们常说“JavaScript是一门单线程的语言”，所以JavaScript是采用异步式I/O+事件循环模式的。但这里我要澄清一下，所谓的单线程，是指在JS引擎中负责解释和执行JavaScript代码的线程只有一个。我们称它<strong>主线程</strong>。</p>
-<p>但是实际上还存在其他的线程。例如：处理AJAX请求的线程、处理DOM事件的线程、定时器线程、读写文件的线程(例如在Node.js中)等等。我们称它们<strong>工作线程</strong>。</p>
-<p>单线程也就意味着，所有任务需要排队，前一个任务结束，才会执行后一个任务。如果前一个任务耗时很长，后一个任务就不得不一直等着。如果排队是因为计算量大，CPU忙不过来，倒也算了，但是很多时候CPU是闲着的，因为I/O很慢，不得不等着结果出来，再往下执行。</p>
-<p>好在我们上文中提到，采用异步式I/O+事件循环模式时，当耗时的I/O的操作结束后，会以事件的形式通知主线程，这样就可以避免阻塞，那么这个<strong>通知机制</strong>是怎样实现的呢？答案是利用消息队列和事件循环。</p>
-<h2 id="消息队列"><a href="#消息队列" class="headerlink" title="消息队列"></a>消息队列</h2><p>当采用异步式I/O+事件循环后，所有任务可以分成两种，一种是同步任务，另一种是异步任务（<em>此处为了理解方便，先只分为同步任务和异步任务，后面我们会细分为宏任务、微任务、正常任务</em>）。同步任务指的是，在主线程上排队执行的任务，只有前一个任务执行完毕，才能执行后一个任务；异步任务指的是，暂时不进入主线程而是进入消息队列的任务，只有主线程的同步任务全部结束后该任务才会进入主线程执行。用一句话概括就是：</p>
-<blockquote>
-<p><strong>工作线程将消息放到消息队列，主线程通过事件循环去取消息。</strong></p>
-</blockquote>
-<ol>
-<li>所有同步任务都在主线程上执行，形成一个执行栈（execution context stack）。</li>
-<li>主线程之外，还存在一个消息队列。只要异步任务有了运行结果，就在消息队列之中放置一个事件。</li>
-<li>一旦”执行栈”中的所有同步任务执行完毕，系统就会读取消息队列，看看里面有哪些事件。那些对应的异步任务结束等待状态，进入执行栈，开始执行。</li>
-<li>主线程只会做一件事情，就是从消息队列里面取消息、执行消息，再取消息、再执行，不断重复上面的第三步。</li>
-</ol>
-<p>用图表示这个过程就是：</p>
-<p><img src="/blog/2018/01/29/JavaScript运行机制-事件驱动编程详解/3.jpg" alt=""></p>
-<h2 id="事件循环"><a href="#事件循环" class="headerlink" title="事件循环"></a>事件循环</h2><p>上文提到主线程从消息队列中读取消息，这个过程是循环不断的。当消息队列为空时，就会等待直到消息队列变成非空。而且主线程只有在将当前的消息执行完成后，才会去取下一个消息。<strong>这种机制就叫做事件循环机制，取一个消息并执行的过程叫做一次事件循环。</strong></p>
-<p>可见异步过程的回调函数，一定不在当前这一轮事件循环中执行，可不一定会在下一轮事件循环中进行(取决于异步过程结束往消息队列添加消息时，队列中是否有其它消息)。</p>
-<p>为了更好地理解事件循环，请看下图:</p>
-<blockquote>
-<p>转引自Philip Roberts的演讲《Help, I’m stuck in an event-loop》</p>
-</blockquote>
-<p><img src="/blog/2018/01/29/JavaScript运行机制-事件驱动编程详解/4.jpg" alt=""></p>
-<p>上图中，主线程运行的时候，产生堆（heap）和栈（stack），当栈中的代码调用DOM事件绑定、ajax请求、以及定时器等外部API时就会交给浏览器内核的其他模块，即上文中提到的<strong>工作线程</strong>进行处理。</p>
-<blockquote>
-<p>webkit内核在Javasctipt执行引擎之外，有一个重要的模块是webcore模块。对于图中WebAPIs提到的三种API，webcore分别提供了DOM Binding、network、timer模块来处理底层实现</p>
-</blockquote>
-<p>等这些工作线程处理完成后，就会往消息队列里放置onClick、onLoad、onDone等相应的事件。只要调用栈中的代码执行完毕，主线程就会依次去读取消息队列，并执行那些事件所对应的回调函数。</p>
-<h1 id="从setTimeout看消息队列与事件循环"><a href="#从setTimeout看消息队列与事件循环" class="headerlink" title="从setTimeout看消息队列与事件循环"></a>从setTimeout看消息队列与事件循环</h1><p>下面依然是用Philip Roberts的演讲中的一个栗子来说明事件循环机制究竟是怎么执行setTimeout的。</p>
-<p><img src="/blog/2018/01/29/JavaScript运行机制-事件驱动编程详解/5.jpg" alt=""></p>
-<p>首先main()函数的执行上下文入栈，开始执行同步任务。</p>
-<p><img src="/blog/2018/01/29/JavaScript运行机制-事件驱动编程详解/6.jpg" alt=""></p>
-<p>遇到console.log(‘Hi’)，此时log(‘Hi’)入栈，console.log方法只是一个webkit内核支持的普通的方法，它是同步任务，所以log(‘Hi’)方法立即出栈被引擎执行。此时输出’Hi’。</p>
-<p><img src="/blog/2018/01/29/JavaScript运行机制-事件驱动编程详解/7.jpg" alt=""></p>
-<p>当遇到setTimeout的时候，将setTimeout(callback,5000)添加到执行栈。</p>
-<p><img src="/blog/2018/01/29/JavaScript运行机制-事件驱动编程详解/8.jpg" alt=""></p>
-<p>调用栈发现setTimeout是之前提到的事件循环模型中WebAPIs中的方法，因此将其出栈执行后将延时执行的函数交给浏览器的timer模块进行处理。</p>
-<p><img src="/blog/2018/01/29/JavaScript运行机制-事件驱动编程详解/9.jpg" alt=""></p>
-<p>timer模块去处理延时执行的函数，此时执行引擎接着立即继续往下处理后面代码，于是将log(‘SJS’)加入执行栈，接下来log(‘SJS’)出栈执行，输出’SJS’。而执行引擎在执行完console.log(‘SJS’)后，程序处理完毕，main()方法也出栈。此时一项同步任务全部完成。</p>
-<p><img src="/blog/2018/01/29/JavaScript运行机制-事件驱动编程详解/10.jpg" alt=""></p>
-<p>当timer模块中延时方法规定的时间到了之后就将其放入到任务队列之中，此时调用栈中的task已经全部执行完毕，主线程处于空闲状态。</p>
-<p><img src="/blog/2018/01/29/JavaScript运行机制-事件驱动编程详解/11.jpg" alt=""></p>
-<p>于是主线程在下一次事件轮询时，发现刚刚放入消息队列的cb事件，便将cb入栈。</p>
-<p><img src="/blog/2018/01/29/JavaScript运行机制-事件驱动编程详解/12.jpg" alt=""></p>
-<p>接着执行cb里面的代码，将log(‘there’)入栈然后出栈执行，输出’there’，等到log执行结束之后cb函数运行完毕，cb接着出栈。之后主线程处于空闲状态，一直不停地轮询消息队列，看看没有要执行的事件。</p>
-<h1 id="宏任务-macro-task-、微任务-micro-task-、正常任务-task"><a href="#宏任务-macro-task-、微任务-micro-task-、正常任务-task" class="headerlink" title="宏任务(macro-task)、微任务(micro-task)、正常任务(task)"></a>宏任务(macro-task)、微任务(micro-task)、正常任务(task)</h1><p>还记得我在最开始抛出来的那个例子吗？我们现在再来看一看</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123; <span class="built_in">console</span>.log(<span class="number">1</span>) &#125;, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span>(<span class="params">resolve</span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="number">2</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">10000</span>; i++) &#123;</span><br><span class="line">            i == <span class="number">9999</span> &amp;&amp; resolve();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="number">3</span>);</span><br><span class="line">    &#125;).then(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="number">4</span>);</span><br><span class="line">        <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span>(<span class="params">resolve</span>) </span>&#123;</span><br><span class="line">            setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">                resolve();</span><br><span class="line">                <span class="built_in">console</span>.log(<span class="number">5</span>);</span><br><span class="line">            &#125;, <span class="number">0</span>);</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="number">6</span>);</span><br><span class="line">        &#125;).then(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="number">7</span>);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">8</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">9</span>;</span><br><span class="line">&#125;)()</span><br></pre></td></tr></table></figure>
-<p>通过上面的介绍，我们已经知道，8、9、1这三个的顺序，但是Promise内的代码是按照什么顺序执行的呢？这里我们要开始介绍macro-task、micro-task和task概念。</p>
-<p><strong>其实上文中提到到同步任务和异步任务，分别对应这里介绍的task和macro-task</strong>。上文中提到消息队列其实就是macro-task队列，task其实就是执行栈中的同步任务。那么micro-task是什么呢？</p>
-<p>刚才我介绍过事件循环机制，我们知道，当一个任务执行完后，主线程会从macro-task队列(之前说的消息队列)中取出事件，开始下一轮的任务执行。而某些情况下，我们需要某些任务要在本轮事件循环结束前执行，于是，除了macro-task队列外，其实还有一个micro-task队列，里面存放<strong>本轮正常任务执行中添加的需要在本轮事件循环结束前、在本轮事件循环所有task结束后</strong>执行的任务。</p>
-<p>我们要区分任务执行的顺序，一定要搞清楚它是什么类型的任务。setTimeout上文已经讨论得很清楚了，它的回调函数是一个macro-task，会被放到macro-task队列。而对于Promise，<strong>被构造时传入的回调函数，是会立即执行的，它是task，会出现在调用栈中</strong>。而Promise实例的<strong>then方法中的回调函数是micro-task，会在该Promise实例的状态改变时(resolve)被放进micro-task队列</strong>。</p>
-<blockquote>
-<p>关于Promise的用法本文不作展开，请自己去学习<a href="http://es6.ruanyifeng.com/#docs/promise" target="_blank" rel="noopener">阮老师的教程</a></p>
-</blockquote>
-<p><strong>macro-task</strong>: setTimeout、setInterval、setImmediate、I/O, UI rendering等</p>
-<p><strong>micro-task</strong>: process.nextTick、Promises.then、Object.observe等</p>
-<p>常见的macro-task和micro-task如上所示，其中setImmediate和process.nextTick是NodeJs里的API，浏览器里并没有，这里只是列举一下。</p>
-<p>总之，事件循环的顺序是从script开始第一次循环，随后全局上下文进入函数调用栈</p>
-<ol>
-<li><strong>碰到macro-task就将其交给处理它的模块处理完之后将回调函数放进macro-task的队列之中</strong></li>
-<li><strong>碰到micro-task也是将其回调函数放进micro-task的队列之中</strong></li>
-<li><strong>直到函数调用栈清空只剩全局执行上下文，然后开始执行所有的micro-task，在执行micro-task时如果再碰到micro-task，会将该micro-task继续添加到micro-task队列，当所有可执行的micro-task执行完毕之后，执行栈结束并返回(return)</strong></li>
-<li><strong>循环再次执行macro-task队列中的一个任务，执行完之后再执行所有的micro-task，就这样一直循环</strong></li>
-</ol>
-<p>增加micro-task和micro-task队列的概念后，用图表示这个过程就是：</p>
-<p><img src="/blog/2018/01/29/JavaScript运行机制-事件驱动编程详解/13.jpg" alt=""><br>macro-task和micro-task任务及其队列</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123; <span class="built_in">console</span>.log(<span class="number">1</span>) &#125;, <span class="number">0</span>); <span class="comment">//回调会被添加到macro-task队列</span></span><br><span class="line">    <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span>(<span class="params">resolve</span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="number">2</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">10000</span>; i++) &#123;</span><br><span class="line">            i == <span class="number">9999</span> &amp;&amp; resolve();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="number">3</span>);</span><br><span class="line">    &#125;).then(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123; <span class="comment">//回调会在resolve后，添加到micro-task队列</span></span><br><span class="line">        <span class="built_in">console</span>.log(<span class="number">4</span>);</span><br><span class="line">        <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span>(<span class="params">resolve</span>) </span>&#123;</span><br><span class="line">            setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123; <span class="comment">//回调会被添加到macro-task队列</span></span><br><span class="line">                resolve();</span><br><span class="line">                <span class="built_in">console</span>.log(<span class="number">5</span>);</span><br><span class="line">            &#125;, <span class="number">0</span>);</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="number">6</span>);</span><br><span class="line">        &#125;).then(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="number">7</span>); <span class="comment">//回调会在resolve后，添加到micro-task队列</span></span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">8</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">9</span>;</span><br><span class="line">&#125;)()</span><br><span class="line"><span class="comment">//控制台打印的结果如下：</span></span><br><span class="line"><span class="comment">//2</span></span><br><span class="line"><span class="comment">//3</span></span><br><span class="line"><span class="comment">//8</span></span><br><span class="line"><span class="comment">//4</span></span><br><span class="line"><span class="comment">//6</span></span><br><span class="line"><span class="comment">//9</span></span><br><span class="line"><span class="comment">//1</span></span><br><span class="line"><span class="comment">//5</span></span><br><span class="line"><span class="comment">//7</span></span><br></pre></td></tr></table></figure>
-<p>参考文章<br><a href="http://www.ruanyifeng.com/blog/2014/10/event-loop.html" target="_blank" rel="noopener">JavaScript 运行机制详解：再谈Event Loop</a><br><a href="http://javascript.ruanyifeng.com/advanced/timer.html" target="_blank" rel="noopener">定时器</a><br><a href="http://www.alloyteam.com/2015/10/turning-to-javascript-series-from-settimeout-said-the-event-loop-model/" target="_blank" rel="noopener">从setTimeout说事件循环</a><br><a href="https://zhuanlan.zhihu.com/p/26229293" target="_blank" rel="noopener">深入浅出Javascript事件循环机制(上)</a><br><a href="https://zhuanlan.zhihu.com/p/26238030" target="_blank" rel="noopener">深入浅出JavaScript事件循环机制(下)</a><br><a href="https://segmentfault.com/a/1190000004322358" target="_blank" rel="noopener">JavaScript：彻底理解同步、异步和事件循环(Event Loop)</a></p>
-
-          
+          先看一个例子1234567891011121314151617181920212223(function test() &#123;    setTimeout(function() &#123; console.log(1) &#125;, 0);    new Promise(function(
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/blog/2018/01/29/JavaScript运行机制-事件驱动编程详解/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -537,68 +446,24 @@
       
         
           
-            <blockquote>
-<p>Nodejs构建静态服务器需要考虑的几个点：</p>
-</blockquote>
-<ul>
-<li>路径分析</li>
-<li>不同类型的文件展示</li>
-<li>增加文件夹逻辑 形如 ‘<a href="http://xxx.com/a/b/" target="_blank" rel="noopener">http://xxx.com/a/b/</a>‘ , 则查找b目录下是否有index.html,如果有就显示，如果没有就列出该目录下的所有文件及文件夹，并可以进一步访问</li>
-<li>增加缓存机制</li>
-</ul>
-<h2 id="路由解析"><a href="#路由解析" class="headerlink" title="路由解析"></a>路由解析</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Koa = <span class="built_in">require</span>(<span class="string">'koa'</span>)</span><br><span class="line"><span class="keyword">const</span> app = <span class="keyword">new</span> Koa()</span><br><span class="line"></span><br><span class="line">app.use( <span class="keyword">async</span> ( ctx ) =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(ctx.request.path);</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">app.listen(<span class="number">3000</span>);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'app started at port 3000 ...'</span>);</span><br></pre></td></tr></table></figure>
-<h2 id="纯文本文件查找和读取"><a href="#纯文本文件查找和读取" class="headerlink" title="纯文本文件查找和读取"></a>纯文本文件查找和读取</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">app.use( <span class="function">(<span class="params"> ctx </span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// 拼接出真实路径</span></span><br><span class="line">    <span class="keyword">let</span> pathName = path.join(staticPath, ctx.request.path);</span><br><span class="line">    <span class="built_in">console</span>.log(pathName);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 读取文件</span></span><br><span class="line">    <span class="keyword">let</span> exist = fs.existsSync(pathName);</span><br><span class="line">    <span class="keyword">if</span> (exist === <span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="keyword">let</span> data = fs.readFileSync(pathName);</span><br><span class="line">        ctx.response.type = <span class="string">"html"</span>;</span><br><span class="line">        ctx.response.body = data;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        ctx.response.type = <span class="string">'text/plain'</span>;</span><br><span class="line">        ctx.response.body = <span class="string">"The request URL '"</span> + pathName + <span class="string">"' was not found on this server"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">console</span>.log(exist);</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-<h2 id="不同类型文件的读取"><a href="#不同类型文件的读取" class="headerlink" title="不同类型文件的读取"></a>不同类型文件的读取</h2><p>MIME值制作映射表<br>MIME.js<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> type = &#123;</span><br><span class="line">    <span class="string">"txt"</span>: <span class="string">"text/plain"</span>,</span><br><span class="line">    <span class="string">"xml"</span>: <span class="string">"text/xml"</span>,</span><br><span class="line">    <span class="string">"html"</span>: <span class="string">"text/html"</span>,</span><br><span class="line">    <span class="string">"css"</span>: <span class="string">"text/css"</span>,</span><br><span class="line">    <span class="string">"js"</span>: <span class="string">"text/javascript"</span>,</span><br><span class="line">    <span class="string">"json"</span>: <span class="string">"application/json"</span>,</span><br><span class="line">    <span class="string">"gif"</span>: <span class="string">"image/gif"</span>,</span><br><span class="line">    <span class="string">"png"</span>: <span class="string">"image/png"</span>,</span><br><span class="line">    <span class="string">"jpeg"</span>: <span class="string">"image/jpeg"</span>,</span><br><span class="line">    <span class="string">"jpg"</span>: <span class="string">"image/jpeg"</span>,</span><br><span class="line">    <span class="string">"svg"</span>: <span class="string">"image/svg+xml"</span>,</span><br><span class="line">    <span class="string">"ico"</span>: <span class="string">"image/x-icon"</span>,</span><br><span class="line">    <span class="string">"pdf"</span>: <span class="string">"application/pdf"</span>,</span><br><span class="line">    <span class="string">"swf"</span>: <span class="string">"application/x-shockwave-flash"</span>,</span><br><span class="line">    <span class="string">"tiff"</span>: <span class="string">"image/tiff"</span>,</span><br><span class="line">    <span class="string">"wav"</span>: <span class="string">"audio/x-wav"</span>,</span><br><span class="line">    <span class="string">"wma"</span>: <span class="string">"audio/x-ms-wma"</span>,</span><br><span class="line">    <span class="string">"wmv"</span>: <span class="string">"video/x-ms-wmv"</span></span><br><span class="line">&#125;</span><br><span class="line">exports.type = type;</span><br></pre></td></tr></table></figure></p>
-<p>通过映射表，根据后缀名来查找 response.type<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> findFileMIME = <span class="function"><span class="keyword">function</span> (<span class="params">pathName</span>) </span>&#123; <span class="comment">// 根据文件后缀名来判断 </span></span><br><span class="line">    <span class="keyword">let</span> filetype = path.extname(pathName).substring(<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">if</span> (MIME.type[filetype]) &#123;</span><br><span class="line">        <span class="keyword">return</span> MIME.type[filetype];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> data = fs.readFileSync(pathName);</span><br><span class="line">ctx.response.type = findFileMIME(pathName) || <span class="string">'text'</span>;</span><br><span class="line">ctx.response.body = data;</span><br></pre></td></tr></table></figure>
-<h2 id="完整的文件和文件夹处理"><a href="#完整的文件和文件夹处理" class="headerlink" title="完整的文件和文件夹处理"></a>完整的文件和文件夹处理</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> main = <span class="keyword">async</span> <span class="function"><span class="keyword">function</span> (<span class="params">ctx, next</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> pathName = path.join(staticPath, ctx.request.path);</span><br><span class="line">    <span class="comment">// 判断文件路径是否存在</span></span><br><span class="line">    <span class="keyword">let</span> exist = fs.existsSync(pathName);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (exist === <span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="comment">// 判断是文件还是文件夹</span></span><br><span class="line">        <span class="keyword">var</span> stats = fs.statSync(pathName);</span><br><span class="line">        <span class="keyword">if</span> (stats.isFile()) &#123; <span class="comment">// 如果是文件， 判断文件类型， 并显示文件</span></span><br><span class="line">            <span class="keyword">let</span> data = fs.readFileSync(pathName);</span><br><span class="line">            ctx.response.type = findFileMIME(pathName) || <span class="string">'text'</span>;</span><br><span class="line">            ctx.response.body = data;</span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (stats.isDirectory()) &#123; <span class="comment">// 如果是文件夹, index.html or 文件列表</span></span><br><span class="line">            <span class="keyword">if</span> (!fs.existsSync(path.join(pathName, <span class="string">'index.html'</span>))) &#123; <span class="comment">// 判断是否存在 index.html</span></span><br><span class="line">                ctx.response.type = <span class="string">'html'</span>;</span><br><span class="line">                <span class="keyword">let</span> htmlbody = <span class="string">"&lt;head&gt;&lt;meta charset = 'utf-8'/&gt;&lt;/head&gt;&lt;body&gt;&lt;ul&gt;"</span>;</span><br><span class="line">                <span class="keyword">let</span> files = <span class="keyword">await</span> fs.readdir(pathName);</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">let</span> i  = <span class="number">0</span>;i&lt;files.length; i++) &#123;</span><br><span class="line">                    <span class="comment">// 排除 DS_STORE 文件</span></span><br><span class="line">                    <span class="keyword">if</span> (files[i]!== <span class="string">'.DS_Store'</span>) &#123;</span><br><span class="line">                        <span class="keyword">let</span> hreflink = path.join(ctx.request.path, files[i]);</span><br><span class="line">                        htmlbody = htmlbody + <span class="string">'&lt;li&gt;&lt;a href="'</span> + hreflink +<span class="string">'"&gt;'</span> + files[i] +<span class="string">'&lt;/a&gt;&lt;/li&gt;'</span>;</span><br><span class="line">                        <span class="built_in">console</span>.log(path.extname(files[i]));</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                htmlbody = htmlbody + <span class="string">'&lt;/ul&gt;&lt;/body&gt;'</span>;</span><br><span class="line">                ctx.response.body = htmlbody;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                ctx.response.redirect(path.join(ctx.request.path, <span class="string">'index.html'</span>));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        ctx.response.type = <span class="string">'text/plain'</span>;</span><br><span class="line">        ctx.response.body = <span class="string">"The request URL '"</span> + pathName + <span class="string">"' was not found on this server"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">app.use(main);</span><br></pre></td></tr></table></figure>
-<h2 id="增加缓存机制"><a href="#增加缓存机制" class="headerlink" title="增加缓存机制"></a>增加缓存机制</h2><p>目的：为了缓解请求量增大对服务器的压力，采用缓存机制能够减少对服务器文件的读写。</p>
-<p>属性：</p>
-<ul>
-<li><p>request </p>
-<ul>
-<li>If-Modified-Since：第一次请求时response 中的 Last-Modified</li>
-<li>If-Nont-Match： 浏览器第一次请求时 response 中的 ETag</li>
-</ul>
-</li>
-<li><p>response</p>
-<ul>
-<li>Cache-Control: max-age=【秒】 || no-cache || no-store || public || private</li>
-<li>ETag: 当前资源在服务器的唯一标志符</li>
-<li>Expires</li>
-<li>Last-Modified: 告诉浏览器当前资源的最后修改时间</li>
-</ul>
-</li>
-</ul>
-<p>HTTP 缓存策略</p>
-<ul>
-<li><strong>本地缓存阶段：</strong> 先在本地查找该资源，如果存在，且资源未过期，则使用这一资源，不发送 http 请求到服务器</li>
-<li><strong>协商缓存阶段：</strong> 如果在本地缓存找到对应资源，但是不知道是否过期，则发一个HTTP请求到服务器，然后服务器判断请求的资源在服务器上是否改动过，没有改动过则返回 304，让浏览器使用本地找到的资源</li>
-<li><strong>缓存失败：</strong> 当服务器发现请求的资源已经修改过，或这是一个新的请求，服务器则返回该资源的数据，并返回200。如果资源未找到则返回 404</li>
-</ul>
-<h3 id="本地缓存阶段"><a href="#本地缓存阶段" class="headerlink" title="本地缓存阶段"></a>本地缓存阶段</h3><ul>
-<li>Expires：缓存过期的绝对时间GMT，如果设置了max-age，expires会失效</li>
-<li>Cache-Control：max-age=【秒】</li>
-</ul>
-<h3 id="前端存储方式"><a href="#前端存储方式" class="headerlink" title="前端存储方式"></a>前端存储方式</h3><ul>
-<li>Cookie &lt;4k 且会在同域网络请求中进行传输，消耗网络带宽，大量Cookie会导致请求变慢，所以Cookie只保存与权限有关的用户信息。</li>
-<li>LocalStorage 存储非敏感的静态数据</li>
-<li>SeesionStorage 关闭浏览器后会清空</li>
-</ul>
-<h3 id="协商缓存阶段"><a href="#协商缓存阶段" class="headerlink" title="协商缓存阶段"></a>协商缓存阶段</h3><ul>
-<li>Last-Modified === if-modified-since 最后修改时间判断</li>
-<li>ETag === If-None-Match 文件的唯一符</li>
-</ul>
-<p>协商流程：<br>1、客户端请求一个页面（A）。<br>2、服务器返回页面A，并在给A加上一个Last-Modified/ETag。<br>3、客户端展现该页面，并将页面连同Last-Modified/ETag一起缓存。<br>4、客户再次请求页面A，并将上次请求时服务器返回的Last-Modified/ETag一起传递给服务器。<br>5、服务器检查该Last-Modified或ETag，并判断出该页面自上次客户端请求之后还未被修改，直接返回响应304和一个空的响应体。</p>
-<p><strong>Etag</strong> 主要为了解决 Last-Modified 无法解决的一些问题：<br>1、一些文件也许会周期性的更改，但是他的内容并不改变(仅仅改变的修改时间)，这个时候我们并不希望客户端认为这个文件被修改了，而重新GET；<br>2、某些文件修改非常频繁，比如在秒以下的时间内进行修改，(比方说1s内修改了N次)，If-Modified-Since能检查到的粒度是s级的，这种修改无法判断(或者说UNIX记录MTIME只能精确到秒)；<br>3、某些服务器不能精确的得到文件的最后修改时间。</p>
-<p><strong>Content-Length：</strong>尽管并没有在缓存中明确涉及，Content-Length头部在设置缓存策略时很重要。某些软件如果不提前获知内容的大小以留出足够空间，则会拒绝缓存该内容。</p>
-<p><strong>Vary：</strong>缓存系统通常使用请求的主机和路径作为存储该资源的键。当判断一个请求是否是请求同样内容时，Vary头部可以被用来提醒缓存系统需要注意另一个附加头部。它通常被用来告诉缓存系统同样注意Accept-Encoding头部，以便缓存系统能够区分压缩和未压缩的内容。</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment">// ************ 判断 缓存 ***********************</span></span><br><span class="line"><span class="keyword">let</span> Expires = &#123;</span><br><span class="line">    fileMatch: <span class="regexp">/^(\.gif|\.png|\.jpg|\.js|\.css|\.html)$/ig</span>,</span><br><span class="line">    maxAge: <span class="number">60</span>*<span class="number">60</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">if</span> (path.extname(ctx.request.path).match(Expires.fileMatch)) &#123;</span><br><span class="line">    <span class="comment">//获取最后修改时间 last-modified </span></span><br><span class="line">    <span class="keyword">var</span> stats = fs.statSync(pathName);</span><br><span class="line">    <span class="keyword">let</span> lastModified = stats.mtime.toUTCString();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// last-modified</span></span><br><span class="line">    <span class="keyword">if</span> (ctx.request.header[<span class="string">'if-modified-since'</span>]) &#123;</span><br><span class="line">        <span class="keyword">if</span> (ctx.request.header[<span class="string">'if-modified-since'</span>] === lastModified) &#123;</span><br><span class="line">            ctx.status = <span class="number">304</span>;</span><br><span class="line">            <span class="keyword">await</span> next();</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// ETag </span></span><br><span class="line">    <span class="keyword">if</span> (ctx.request.header[<span class="string">'if-none-match'</span>]) &#123;</span><br><span class="line">        <span class="keyword">if</span> (ctx.request.header[<span class="string">'if-none-match'</span>] == lastModified) &#123;</span><br><span class="line">            ctx.status = <span class="number">304</span>;</span><br><span class="line">            <span class="keyword">await</span> next();</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// cache 失效 fetch new data</span></span><br><span class="line">    ctx.set(<span class="string">'ETag'</span>, lastModified);</span><br><span class="line">    ctx.set(<span class="string">'Last-Modified'</span>, lastModified);</span><br><span class="line">    ctx.status = <span class="number">200</span>;</span><br><span class="line">    <span class="keyword">let</span> data = fs.readFileSync(pathName);</span><br><span class="line">    ctx.response.type = findFileMIME(pathName) || <span class="string">'text'</span>;</span><br><span class="line">    ctx.response.body = data;</span><br><span class="line">    <span class="keyword">await</span> next();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
-<li><a href="http://imweb.io/topic/55c6f9bac222e3af6ce235b9" target="_blank" rel="noopener">缓存策略</a></li>
-</ul>
-
           
+Nodejs构建静态服务器需要考虑的几个点：
+
+
+路径分析
+不同类型的文件展示
+增加文件夹逻辑 形如 ‘http://xxx.com/a/b/‘ , 则查找b目录下是否有index.html,如果有就显示，如果没有就列出该目录下的所有文件及文件夹，并可以进一步访问
+增加缓存机制
+
+路由解析1234
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/blog/2017/12/18/Nodejs实现静态资源服务器/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -716,170 +581,37 @@
       
         
           
-            <h1 id="Less代码规范"><a href="#Less代码规范" class="headerlink" title="Less代码规范"></a>Less代码规范</h1><h2 id="Less代码校验规则遵循stylelint-recommended"><a href="#Less代码校验规则遵循stylelint-recommended" class="headerlink" title="Less代码校验规则遵循stylelint:recommended"></a>Less代码校验规则遵循stylelint:recommended</h2><ul>
-<li><a href="https://github.com/stylelint/stylelint-config-recommended/blob/master/index.js" target="_blank" rel="noopener">stylelint:recommended</a></li>
-<li><a href="https://stylelint.io/user-guide/rules/" target="_blank" rel="noopener">stylelint详细规则</a></li>
-</ul>
-<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ol>
-<li><a href="#terminology">术语</a><ul>
-<li><a href="#rule-declaration">规则声明</a></li>
-<li><a href="#selectors">选择器</a></li>
-<li><a href="#properties">属性</a></li>
-</ul>
-</li>
-<li><a href="#classify">文件分类</a></li>
-<li><a href="#naming">命名规则</a></li>
-<li><a href="#formatting">格式</a></li>
-<li><a href="#comments">注释</a></li>
-<li><a href="#order">书写顺序</a><ul>
-<li><a href="#less-order">Less书写顺序</a></li>
-<li><a href="#rule-order">属性书写顺序</a></li>
-</ul>
-</li>
-<li><a href="#good">最佳实践</a></li>
-<li><a href="#bad">典型错误</a></li>
-<li><a href="#reference">参考</a></li>
-</ol>
-<p><a name="terminology"></a></p>
-<h2 id="术语"><a href="#术语" class="headerlink" title="术语"></a>术语</h2><p><a name="rule-declaration"></a></p>
-<h3 id="规则声明"><a href="#规则声明" class="headerlink" title="规则声明"></a>规则声明</h3><p>我们把一个（或一组）选择器和一组属性称之为 “规则声明”。举个例子：</p>
-<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.listing</span> &#123;</span><br><span class="line">  <span class="attribute">font-size</span>: <span class="number">18px</span>;</span><br><span class="line">  <span class="attribute">line-height</span>: <span class="number">1.2</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><a name="selectors"></a></p>
-<h3 id="选择器"><a href="#选择器" class="headerlink" title="选择器"></a>选择器</h3><p>在规则声明中，“选择器” 负责选取 DOM 树中的元素，这些元素将被定义的属性所修饰。选择器可以匹配 HTML 元素，也可以匹配一个元素的类名、ID, 或者元素拥有的属性。以下是选择器的例子：</p>
-<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.my-element-class</span> &#123;</span><br><span class="line">  <span class="comment">/* ... */</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="selector-attr">[aria-hidden]</span> &#123;</span><br><span class="line">  <span class="comment">/* ... */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><a name="properties"></a></p>
-<h3 id="属性"><a href="#属性" class="headerlink" title="属性"></a>属性</h3><p>最后，属性决定了规则声明里被选择的元素将得到何种样式。属性以键值对形式存在，一个规则声明可以包含一或多个属性定义。以下是属性定义的例子：</p>
-<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* some selector */</span> &#123;</span><br><span class="line">  <span class="attribute">background</span>: <span class="number">#f1f1f1</span>;</span><br><span class="line">  <span class="attribute">color</span>: <span class="number">#333</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><a name="classify"></a></p>
-<h2 id="文件分类"><a href="#文件分类" class="headerlink" title="文件分类"></a>文件分类</h2><p>页面的样式入口文件按顺序引入以下Less文件。</p>
-<ol>
-<li>globals.less 全局文件</li>
-<li>components.less 组件</li>
-<li>sections.less 区块</li>
-<li>main.less 页面主体内容</li>
-</ol>
-<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* globals.less */</span></span><br><span class="line"><span class="keyword">@import</span> <span class="string">"globals/mixins"</span>;</span><br><span class="line"><span class="keyword">@import</span> <span class="string">"globals/colors"</span>;</span><br><span class="line"><span class="keyword">@import</span> <span class="string">"globals/fonts"</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* components.less */</span></span><br><span class="line"><span class="keyword">@import</span> <span class="string">"components/tabs"</span>;</span><br><span class="line"><span class="keyword">@import</span> <span class="string">"components/modals"</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* sections.less */</span></span><br><span class="line"><span class="keyword">@import</span> <span class="string">"sections/header"</span>;</span><br><span class="line"><span class="keyword">@import</span> <span class="string">"sections/footer"</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* main.less */</span></span><br><span class="line"><span class="keyword">@import</span> <span class="string">"app/main"</span>;</span><br></pre></td></tr></table></figure>
-<p><a name="naming"></a></p>
-<h2 id="命名规则"><a href="#命名规则" class="headerlink" title="命名规则"></a>命名规则</h2><p>CSS的命名规则</p>
-<ol>
-<li>统一处理：建议在这个位置统一调用背景图（这里指多个布局或模块或元件共用的图）和清除浮动（这里指通用性较高的布局、模块、元件内的清除）等统一设置处理的样式！</li>
-<li>布局（grid）（.g-）：将页面分割为几个大块，通常有头部、主体、主栏、侧栏、尾部等！</li>
-<li>模块（module）（.m-）：通常是一个语义化的可以重复使用的较大的整体！比如导航、登录、注册、各种列表、评论、搜索等！</li>
-<li>元件（unit）（.u-）：通常是一个不可再分的较为小巧的个体，通常被重复用于各种模块中！比如按钮、输入框、loading、图标等！</li>
-<li>功能（function）（.f-）：为方便一些常用样式的使用，我们将这些使用率较高的样式剥离出来，按需使用，通常这些选择器具有固定样式表现，比如清除浮动等！不可滥用！</li>
-<li>皮肤（skin）（.s-）：如果你需要把皮肤型的样式抽离出来，通常为文字色、背景色（图）、边框色等，非换肤型网站通常只提取文字色！非换肤型网站不可滥用此类！</li>
-<li>状态（.z-）：为状态类样式加入前缀，统一标识，方便识别，她只能组合使用或作为后代出现（.u-ipt.z-dis{}，.m-list li.z-sel{}），具体详见命名规则的扩展相关项。<br>功能类和皮肤类样式为表现化的样式，请不要滥用！以上顺序可以按需求适当调整。</li>
-</ol>
-<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 统一清除浮动 */</span></span><br><span class="line"><span class="selector-class">.g-bdc</span><span class="selector-pseudo">:after</span>,</span><br><span class="line"><span class="selector-class">.m-dimg</span> <span class="selector-tag">ul</span><span class="selector-pseudo">:after</span>,</span><br><span class="line"><span class="selector-class">.u-tab</span><span class="selector-pseudo">:after</span> &#123;</span><br><span class="line">  <span class="attribute">display</span>: block;</span><br><span class="line">  <span class="attribute">visibility</span>: hidden;</span><br><span class="line">  <span class="attribute">clear</span>: both;</span><br><span class="line">  <span class="attribute">height</span>: <span class="number">0</span>;</span><br><span class="line">  <span class="attribute">overflow</span>: hidden;</span><br><span class="line">  <span class="attribute">content</span>: <span class="string">'.'</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="selector-class">.g-bdc</span>,</span><br><span class="line"><span class="selector-class">.m-dimg</span> <span class="selector-tag">ul</span>,</span><br><span class="line"><span class="selector-class">.u-tab</span> &#123;</span><br><span class="line">  <span class="attribute">zoom</span>: <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/* 布局 */</span></span><br><span class="line"><span class="selector-class">.g-sd</span> &#123;</span><br><span class="line">  <span class="attribute">float</span>: left;</span><br><span class="line">  <span class="attribute">width</span>: <span class="number">300px</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/* 模块 */</span></span><br><span class="line"><span class="selector-class">.m-logo</span> &#123;</span><br><span class="line">  <span class="attribute">width</span>: <span class="number">200px</span>;</span><br><span class="line">  <span class="attribute">height</span>: <span class="number">50px</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/* 元件 */</span></span><br><span class="line"><span class="selector-class">.u-btn</span> &#123;</span><br><span class="line">  <span class="attribute">height</span>: <span class="number">20px</span>;</span><br><span class="line">  <span class="attribute">border</span>: <span class="number">1px</span> solid <span class="number">#333</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/* 功能 */</span></span><br><span class="line"><span class="selector-class">.f-tac</span> &#123;</span><br><span class="line">  <span class="attribute">text-align</span>: center;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/* 皮肤 */</span></span><br><span class="line"><span class="selector-class">.s-fc</span>,</span><br><span class="line"><span class="selector-tag">a</span><span class="selector-class">.s-fc</span><span class="selector-pseudo">:hover</span> &#123;</span><br><span class="line">  <span class="attribute">color</span>: <span class="number">#fff</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><a name="formatting"></a></p>
-<h2 id="格式"><a href="#格式" class="headerlink" title="格式"></a>格式</h2><ul>
-<li>使用 2 个空格作为缩进。</li>
-<li>类名建议使用破折号代替驼峰法。</li>
-<li>在一个规则声明中应用了多个选择器时，每个选择器独占一行。</li>
-<li>在规则声明的左大括号 <code>{</code> 前加上一个空格。</li>
-<li>在属性的冒号 <code>:</code> 后面加上一个空格，前面不加空格。</li>
-<li>规则声明的右大括号 <code>}</code> 独占一行。</li>
-<li>规则声明之间用空行分隔开。</li>
-</ul>
-<p><a name="comments"></a></p>
-<h2 id="注释"><a href="#注释" class="headerlink" title="注释"></a>注释</h2><ul>
-<li>建议使用行注释代替块注释。</li>
-<li>建议注释独占一行。避免行末注释。</li>
-<li>给没有自注释的代码写上详细说明，比如：<ul>
-<li>为什么用到了 z-index<br>例如，// modals are 6000, saving messages are 5500, header is 2000</li>
-<li>兼容性处理或者针对特定浏览器的 hack</li>
-</ul>
-</li>
-</ul>
-<p><a name="order"></a></p>
-<h2 id="书写顺序"><a href="#书写顺序" class="headerlink" title="书写顺序"></a>书写顺序</h2><p><a name="less-order"></a></p>
-<h3 id="LESS书写顺序"><a href="#LESS书写顺序" class="headerlink" title="LESS书写顺序"></a>LESS书写顺序</h3><ol>
-<li>Extend （扩展）</li>
-<li>Mixins (混合)</li>
-<li>常规样式，在extends和mixins之后添加常规样式允许我们正确地覆盖这些属性（如果需要）。</li>
-<li>伪元素和伪类样式</li>
-<li>嵌套样式<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.weather</span> &#123;</span><br><span class="line">  <span class="selector-tag">&amp;</span><span class="selector-pseudo">:extend(.module)</span>;</span><br><span class="line">  <span class="selector-class">.transition</span>(all <span class="number">0.3s</span> ease-out);</span><br><span class="line">  <span class="attribute">background</span>: LightCyan;</span><br><span class="line">  <span class="selector-tag">&amp;</span><span class="selector-pseudo">:hover</span> &#123;</span><br><span class="line">    <span class="attribute">background</span>: DarkCyan;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="selector-tag">&amp;</span><span class="selector-pseudo">::before</span> &#123;</span><br><span class="line">    <span class="attribute">content</span>: <span class="string">""</span>;</span><br><span class="line">    <span class="attribute">display</span>: block;</span><br><span class="line">  &#125;</span><br><span class="line">  &gt; <span class="selector-tag">h3</span> &#123;</span><br><span class="line">    <span class="selector-class">.transform</span>(rotate(<span class="number">90deg</span>));</span><br><span class="line">    <span class="attribute">border-bottom</span>: <span class="number">1px</span> solid white;</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-</ol>
-<p><a name="rule-order"></a></p>
-<h3 id="属性书写顺序"><a href="#属性书写顺序" class="headerlink" title="属性书写顺序"></a>属性书写顺序</h3><table>
-<thead>
-<tr>
-<th>→</th>
-<th>显示属性</th>
-<th>自身属性</th>
-<th>文本属性和其他修饰</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td>display</td>
-<td>width</td>
-<td>font</td>
-</tr>
-<tr>
-<td></td>
-<td>visibility</td>
-<td>height</td>
-<td>text-align</td>
-</tr>
-<tr>
-<td></td>
-<td>position</td>
-<td>margin</td>
-<td>text-decoration</td>
-</tr>
-<tr>
-<td></td>
-<td>float</td>
-<td>padding</td>
-<td>vertical-align</td>
-</tr>
-<tr>
-<td></td>
-<td>clear</td>
-<td>border</td>
-<td>white-space</td>
-</tr>
-<tr>
-<td></td>
-<td>list-style</td>
-<td>overflow</td>
-<td>color</td>
-</tr>
-<tr>
-<td></td>
-<td>top</td>
-<td>min-width</td>
-<td>background</td>
-</tr>
-</tbody>
-</table>
-<p><a name="good"></a></p>
-<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><ul>
-<li>使用变量命名常用的数字和颜色</li>
-</ul>
-<p><a name="bad"></a></p>
-<h2 id="典型错误"><a href="#典型错误" class="headerlink" title="典型错误"></a>典型错误</h2><ul>
-<li>不要使用 ID 选择器。</li>
-<li>不要使用!important</li>
-<li>不要使用浏览器私有前缀，使用autoprefixer替代。</li>
-<li><p>嵌套选择器的深度不要超过 3 层！</p>
-<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.page-container</span> &#123;</span><br><span class="line">  <span class="selector-class">.content</span> &#123;</span><br><span class="line">    <span class="selector-class">.profile</span> &#123;</span><br><span class="line">      <span class="comment">// STOP!</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>不要使用class作为javascript钩子，在react中可使用refs替代javascript钩子。</p>
-</li>
-<li>嵌套选择器的行数不要超过 50 行!</li>
-</ul>
-<p><a name="reference"></a></p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
-<li><a href="https://github.com/Zhangjd/css-style-guide" target="_blank" rel="noopener">Airbnb CSS / Sass 指南</a></li>
-<li><a href="http://nec.netease.com/standard/css-sort.html" target="_blank" rel="noopener">Netease CSS规范</a></li>
-<li><a href="https://css-tricks.com/sass-style-guide/" target="_blank" rel="noopener">Sass Style Guide</a></li>
-</ul>
+          Less代码规范Less代码校验规则遵循stylelint:recommended
+stylelint:recommended
+stylelint详细规则
 
-          
+目录
+术语
+规则声明
+选择器
+属性
+
+
+文件分类
+命名规则
+格式
+注释
+书写顺序
+Less书写顺序
+属性书写顺序
+
+
+最佳实践
+典型错误
+参考
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/blog/2017/12/06/Less代码规范/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -997,17 +729,19 @@
       
         
           
-            <h2 id="快速开始"><a href="#快速开始" class="headerlink" title="快速开始"></a>快速开始</h2><h3 id="获取源码"><a href="#获取源码" class="headerlink" title="获取源码"></a>获取源码</h3><p>代码托管在<code>NSFI</code>组下的<code>sf-blog-source</code>中</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git <span class="built_in">clone</span> https://github.com/NSFI/sf-blog-source.git</span><br></pre></td></tr></table></figure>
-<h3 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm install</span><br></pre></td></tr></table></figure>
-<h3 id="创建文章"><a href="#创建文章" class="headerlink" title="创建文章"></a>创建文章</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">'文章title'</span></span><br></pre></td></tr></table></figure>
-<h3 id="本地服务预览"><a href="#本地服务预览" class="headerlink" title="本地服务预览"></a>本地服务预览</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<h3 id="生成静态文件"><a href="#生成静态文件" class="headerlink" title="生成静态文件"></a>生成静态文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo g</span><br></pre></td></tr></table></figure>
-<h3 id="部署到服务器"><a href="#部署到服务器" class="headerlink" title="部署到服务器"></a>部署到服务器</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo d</span><br></pre></td></tr></table></figure>
-<p>为了保证统一，部署之前最好将代码推到github库中去以后再执行<code>hexo d</code>。</p>
-<p>More info: <a href="https://hexo.io/zh-cn/docs/index.html" target="_blank" rel="noopener">hexo文档</a></p>
-
-          
+          快速开始获取源码代码托管在NSFI组下的sf-blog-source中
+1$ git clone https://github.com/NSFI/sf-blog-source.git
+安装依赖1$ npm install
+创建文章1$ hexo new '文章title'
+本地服务预览1$ hexo
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/blog/2017/11/20/Quick-Start/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
