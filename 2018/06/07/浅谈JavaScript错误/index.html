@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/blog/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/blog/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/favicon.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/favicon.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/favicon.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="javascript,大圣,error," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本文主要从前端开发者的角度谈一谈大多数前端开发者都会遇到的js错误，对错误产生的原因、发生阶段，以及如何应对错误进行分析、归纳和总结，希望得到一些有益的结论用来指导日常开发工作。 概念辨析错误（Error）和异常（Exception）对于Java来说错误和异常是两个相近但是不同的概念，而在JavaScript中可以认为错误和异常是等同的，js里只有Error关键字，并无Exception关键字。下">
+<meta name="keywords" content="javascript,大圣,error">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅谈JavaScript错误">
+<meta property="og:url" content="http://nsfi.github.io/blog/2018/06/07/浅谈JavaScript错误/index.html">
+<meta property="og:site_name" content="网易先知&amp;&amp;网易七鱼前端团队博客">
+<meta property="og:description" content="本文主要从前端开发者的角度谈一谈大多数前端开发者都会遇到的js错误，对错误产生的原因、发生阶段，以及如何应对错误进行分析、归纳和总结，希望得到一些有益的结论用来指导日常开发工作。 概念辨析错误（Error）和异常（Exception）对于Java来说错误和异常是两个相近但是不同的概念，而在JavaScript中可以认为错误和异常是等同的，js里只有Error关键字，并无Exception关键字。下">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-06-25T08:52:41.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="浅谈JavaScript错误">
+<meta name="twitter:description" content="本文主要从前端开发者的角度谈一谈大多数前端开发者都会遇到的js错误，对错误产生的原因、发生阶段，以及如何应对错误进行分析、归纳和总结，希望得到一些有益的结论用来指导日常开发工作。 概念辨析错误（Error）和异常（Exception）对于Java来说错误和异常是两个相近但是不同的概念，而在JavaScript中可以认为错误和异常是等同的，js里只有Error关键字，并无Exception关键字。下">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://nsfi.github.io/blog/2018/06/07/浅谈JavaScript错误/"/>
+
+
+
+
+
+  <title>浅谈JavaScript错误 | 网易先知&&网易七鱼前端团队博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">网易先知&&网易七鱼前端团队博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description"></h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/blog/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/blog/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/blog/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/blog/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://nsfi.github.io/blog/blog/2018/06/07/浅谈JavaScript错误/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="giflee">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="网易先知&&网易七鱼前端团队博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">浅谈JavaScript错误</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">大圣</span>
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-07T23:07:19+08:00">
+                2018-06-07
+              </time>
+            
+
+            
+
+            
+          </span>
+          <div>
+            
+              <a href="/blog/tags/javascript/" rel="tag"># javascript</a>
+            
+              <a href="/blog/tags/大圣/" rel="tag"># 大圣</a>
+            
+              <a href="/blog/tags/error/" rel="tag"># error</a>
+            
+          </div>
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/javascript/" itemprop="url" rel="index">
+                    <span itemprop="name">javascript</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文主要从前端开发者的角度谈一谈大多数前端开发者都会遇到的js错误，对错误产生的原因、发生阶段，以及如何应对错误进行分析、归纳和总结，希望得到一些有益的结论用来指导日常开发工作。</p>
+<h2 id="概念辨析"><a href="#概念辨析" class="headerlink" title="概念辨析"></a>概念辨析</h2><h3 id="错误（Error）和异常（Exception）"><a href="#错误（Error）和异常（Exception）" class="headerlink" title="错误（Error）和异常（Exception）"></a>错误（Error）和异常（Exception）</h3><p>对于Java来说错误和异常是两个相近但是不同的概念，而在JavaScript中可以认为错误和异常是等同的，js里只有Error关键字，并无Exception关键字。下文指的js错误也指通常理解的js异常。</p>
+<h3 id="js错误和bug"><a href="#js错误和bug" class="headerlink" title="js错误和bug"></a>js错误和bug</h3><h4 id="js错误："><a href="#js错误：" class="headerlink" title="js错误："></a>js错误：</h4><p>通常是非程序设计的原因导致的错误，大部分是发生在应用环境中的外部错误，比如硬件故障导致的I/O Error、网络不稳定导致的Network Error，调用不被信任的外部方法，DOM操作，使用new Image、new FileReader加载资源。错误可以被忽略或者捕获，代码可以通过预设错误处理流程，例如使用了重试机制的代码可以通过重试有可能让程序恢复到正常状态。</p>
+<h4 id="bug："><a href="#bug：" class="headerlink" title="bug："></a>bug：</h4><p>通常是程序设计的原因导致的计算机程序或系统中的缺陷，能够引发错误或意外结果，或使程序或系统以非预期方式运行。通常无法继续和恢复，需要程序员进入程序并且修改代码来修复。</p>
+<h2 id="javaScript错误发生阶段"><a href="#javaScript错误发生阶段" class="headerlink" title="javaScript错误发生阶段"></a>javaScript错误发生阶段</h2><p>由于JavaScript语言解释型的特性，js错误发生在运行时，这一点和编译型语言相比错误更加难以发现。幸运的是技术发展到今天已经有非常多成熟的工具比如Eslint、IDE的代码检查，可以帮助我们在早期不需要运行程序的阶段发现错误。还有一些JavaScript语言的超集语言，为语言添加了可选的静态类型，也可以帮助在早期发现错误。程序运行开始后，在进行用户交互之前，一些语法错误，常见的比如Uncaught SyntaxError是非常容易发现的。而剩下的那些，基本上需要通过用户交互来触发，较难以发现，本文着重讨论这部分错误。</p>
+<h2 id="错误的几种应对方式"><a href="#错误的几种应对方式" class="headerlink" title="错误的几种应对方式"></a>错误的几种应对方式</h2><h3 id="不捕获错误"><a href="#不捕获错误" class="headerlink" title="不捕获错误"></a>不捕获错误</h3><p>如果判断程序当前位置可能会发生错误，不捕获错误是一种消极的应对方式。依赖全局window.onerror错误监听能够获取未捕获的错误信息。</p>
+<h3 id="捕获错误，不处理，抛出"><a href="#捕获错误，不处理，抛出" class="headerlink" title="捕获错误，不处理，抛出"></a>捕获错误，不处理，抛出</h3><p>如果捕获错误后马上抛出，抛出的error对象就是原来的对象，相当于啥也没干，等同于不捕获错误。一般来说采用这种应对方式时都会干点什么，比如抛出一个自定义的错误，而不是原始错误对象。</p>
+<h3 id="捕获错误，不处理，不抛出"><a href="#捕获错误，不处理，不抛出" class="headerlink" title="捕获错误，不处理，不抛出"></a>捕获错误，不处理，不抛出</h3><p>要小心不处理不抛出意味着全局window.onerror错误监听也无法获取到该错误信息，一般来说这种应对方式用在一些不影响程序主流程的错误处理上，比如调用DOM节点的focus方法，但还是需要注释合理的理由。<br>捕获错误后静默处理的示例:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">try &#123;</span><br><span class="line">    obj[0].focus();</span><br><span class="line">&#125; catch (e) &#123;</span><br><span class="line">    // IE8 can throw &quot;Can&apos;t move focus to the control because it is invisible,</span><br><span class="line">    // not enabled, or of a type that does not accept the focus.&quot; for all kinds of</span><br><span class="line">    // reasons that are too expensive and fragile to test.</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="捕获错误，处理"><a href="#捕获错误，处理" class="headerlink" title="捕获错误，处理"></a>捕获错误，处理</h3><p>通常会在处理方法体中使用错误日志上报、失效保护、重试恢复等技术。失效保护即降级处理，举一个比较简明的例子，<code>try { a = JSON.parse(b); } catch (e) { a = {}; }</code></p>
+<h2 id="几个引申出的问题"><a href="#几个引申出的问题" class="headerlink" title="几个引申出的问题"></a>几个引申出的问题</h2><h3 id="不处理错误造成的影响？"><a href="#不处理错误造成的影响？" class="headerlink" title="不处理错误造成的影响？"></a>不处理错误造成的影响？</h3><p>这个问题缺乏前提，到底是捕获了不处理还是未捕获错误。前者已有解答，这里说未捕获错误可能会造成的影响。错误发生后，在出错位置之前的代码已经执行过了，之后的代码不再执行，这种情况基本上就是bug了。由于js的并发模型与事件循环机制，如果在出错位置之前执行过异步代码，比如setTimeout、new Promise，异步代码中的回调函数仍然会在“执行栈”中的所有同步任务执行完毕之后按照回调函数在任务队列里的顺序执行。值得注意的是，利用这种特性，可以将错误包装在一个异步执行的函数中使用异步抛出错误的技术，能够避免阻断错误处之后的代码执行。<br>异步抛出错误示例:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> asyncThrowError = <span class="function">(<span class="params">error</span>) =&gt;</span> &#123;</span><br><span class="line">    setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">throw</span> error || <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">'异步抛出的异常'</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> a = <span class="built_in">JSON</span>.parse(<span class="string">'&#123;a: a&#125;'</span>);</span><br><span class="line">&#125; <span class="keyword">catch</span>(e) &#123;</span><br><span class="line">    <span class="comment">// 使用异步抛出异常的技术，依靠window.onerror捕获异常并记录日志</span></span><br><span class="line">    asyncThrowError(e);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="什么时候应该捕获错误？"><a href="#什么时候应该捕获错误？" class="headerlink" title="什么时候应该捕获错误？"></a>什么时候应该捕获错误？</h3><p>当然是预感程序某一处可能会出现问题的时候啦。具体什么时候则见仁见智啦，依赖程序员的经验。</p>
+<h3 id="什么时候应该抛出错误，错误抛出后会怎么样？"><a href="#什么时候应该抛出错误，错误抛出后会怎么样？" class="headerlink" title="什么时候应该抛出错误，错误抛出后会怎么样？"></a>什么时候应该抛出错误，错误抛出后会怎么样？</h3><p>人为主动抛出的错误和应用环境中的发生的错误同样会导致错误位置之后的代码无法执行。常见的一种用法是在函数检查传入的参数是否合法，不合法就使程序快速失效（Fail Fast），提醒开发者修复问题。还可以将抛出错误技术用在收集用户填写的不合法的表单数据上，在内层代码中抛出错误，在外层代码中捕获错误并判断错误类型，获取到错误信息。</p>
+<h3 id="错误的重试与恢复"><a href="#错误的重试与恢复" class="headerlink" title="错误的重试与恢复"></a>错误的重试与恢复</h3><p>如果前提得是可恢复类型的错误，在程序中加入重试机制才有意义。可恢复的错误通常是外部原因导致的，典型例子如网络错误。重试机制根据是否需要用户交互触发可分为自动重试和手动重试。自动重试的一种设计是，通过线性增长的间隔时间或者成指数增长的间隔时间循环重试直到没有错误发生，尤其是指数增长的间隔时间循环重试机制可以避免程序太快将计算机资源占满。手动重试的一个设计例子是，在一些关键业务流程，比如电商场景中的添加到购物车，当接口返回失败时，可以通过让用户手动点击重试按钮触发新的一轮接口调用。<br>自动重试的一种设计方案:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> sendMesg = <span class="function">(<span class="params">errorResendTimes = <span class="number">0</span></span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(errorResendTimes);</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="string">'hahaha'</span>;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">        setTimeout(</span><br><span class="line">            () =&gt; sendMesg(errorResendTimes), </span><br><span class="line">            <span class="number">100</span> * <span class="built_in">Math</span>.pow(<span class="number">2</span>, errorResendTimes) <span class="comment">// 使用指数增长的时间间隔</span></span><br><span class="line">            <span class="comment">// 100 * errorResendTimes // 使用线性增长的时间间隔</span></span><br><span class="line">        );</span><br><span class="line">        errorResendTimes++;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<h3 id="错误的隔离与降级"><a href="#错误的隔离与降级" class="headerlink" title="错误的隔离与降级"></a>错误的隔离与降级</h3><p>这个是js中捕获并处理错误的最核心的出发点，有经验的程序员为了避免未捕获的错误阻断程序执行造成bug，需要在程序中设置陷阱（使用try/catch语句）捕获错误。当错误发生的时候，使用了错误捕获技术的地方可以防止错误影响当前调用栈之后的代码执行，隔离了错误的影响范围，将影响范围限制在当前函数作用域。错误的降级处理指的是当错误发生后，虽然已使用错误捕获技术隔离了影响范围，但是假如当前调用栈之后的代码仍然依赖当前的执行结果，错误导致执行结果为非预期的数据类型，那么之后的代码使用该执行结果必然又会出错。<br>错误的降级处理示例:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> a;</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    a = <span class="built_in">JSON</span>.parse(<span class="string">'&#123;a: a&#125;'</span>);</span><br><span class="line">&#125; <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">    a = &#123;&#125;;</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">console</span>.log(a.a);</span><br></pre></td></tr></table></figure></p>
+<h4 id="如何上报错误信息到日志服务器"><a href="#如何上报错误信息到日志服务器" class="headerlink" title="如何上报错误信息到日志服务器"></a>如何上报错误信息到日志服务器</h4><p>这个问题分为两个步骤，首先要获取到错误信息，其次是预处理这些错误信息，通常情况下使用一些技术手段合并、降频，最后再上报日志服务器。这里着重谈如何获取到更全面细致的错误信息。直接看示例：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line">// 监听js运行时异常</span><br><span class="line">window.onerror = (message, source, lineno, colno, error) =&gt; &#123;</span><br><span class="line">    var errorMesg = wrapError(&#123;message, source, lineno, colno, error&#125;);</span><br><span class="line">    console.log(message)</span><br><span class="line">    sendErrorToServer(&apos;js运行时异常：&apos; + errorMesg);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 监听document资源加载异常</span><br><span class="line">window.addEventListener(&apos;error&apos;, function(e) &#123;</span><br><span class="line">    // 过滤非window上捕获的异常</span><br><span class="line">    if (e.target === window) &#123;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line">    var errorMesg = wrapError(e);</span><br><span class="line">    sendErrorToServer(&apos;document资源加载异常：&apos; + errorMesg);</span><br><span class="line">&#125;, true);</span><br><span class="line"></span><br><span class="line">// 监听未捕获的Promise异常</span><br><span class="line">window.addEventListener(&apos;unhandledrejection&apos;, function(e) &#123;</span><br><span class="line">    var errorMesg = e.reason;</span><br><span class="line">    sendErrorToServer(&apos;未捕获的Promise异常：&apos; + errorMesg);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 监听最初未捕获稍后又被捕获的Promise异常</span><br><span class="line">window.addEventListener(&apos;rejectionhandled&apos;, function(e) &#123;</span><br><span class="line">    var errorMesg = e.reason;</span><br><span class="line">    sendErrorToServer(&apos;最初未捕获稍后又被捕获的Promise异常：&apos; + errorMesg);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 已捕获的Promise异常</span><br><span class="line">new Promise(function(resolve, reject) &#123;</span><br><span class="line">    // reject(&apos;我被捕获了&apos;);</span><br><span class="line">    throw new Error(&apos;我被捕获了&apos;);</span><br><span class="line">&#125;).catch(function(reason) &#123;</span><br><span class="line">    var errorMesg = reason;</span><br><span class="line">    sendErrorToServer(&apos;已捕获的Promise异常：&apos; + errorMesg);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 未捕获的Promise异常</span><br><span class="line">new Promise(function(resolve, reject) &#123;</span><br><span class="line">    reject(&apos;我没有被捕获&apos;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 最初未捕获稍后又被捕获的Promise异常：</span><br><span class="line">var p1 = new Promise(function(resolve, reject) &#123;</span><br><span class="line">    reject(&apos;我后来被捕获了&apos;);</span><br><span class="line">&#125;);</span><br><span class="line">setTimeout(function()&#123;</span><br><span class="line">    p1.catch(function(e) &#123;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;, 200);</span><br><span class="line"></span><br><span class="line">function sendErrorToServer(error) &#123;</span><br><span class="line">    const img = new Image();</span><br><span class="line">    var from = window.location.href;</span><br><span class="line">    error += &apos;\n&apos; + from;</span><br><span class="line">    img.src = &quot;http://www.baidu.com?error=&quot; + error;</span><br><span class="line">&#125;</span><br><span class="line">function wrapError(&#123;message=&apos;&apos;, source=&apos;&apos;, lineno=&apos;&apos;, colno=&apos;&apos;, error, target&#125;) &#123;</span><br><span class="line">    var returned = &apos;&apos;;</span><br><span class="line">    var mesg = error &amp;&amp; error.toString() || message;</span><br><span class="line">    var stack = error &amp;&amp; error.stack || &apos;&apos;;</span><br><span class="line">    returned += &apos;\n&apos; + mesg;</span><br><span class="line">    returned += &apos;\n&apos; + source;</span><br><span class="line">    returned += &apos;\n&apos; + lineno;</span><br><span class="line">    returned += &apos;\n&apos; + colno;</span><br><span class="line">    returned += &apos;\n&apos; + stack;</span><br><span class="line">    if (target &amp;&amp; target.outerHTML) &#123;</span><br><span class="line">        returned += &apos;\n&apos; + target.outerHTML;</span><br><span class="line">    &#125;</span><br><span class="line">    return returned;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h2><h3 id="捕获错误："><a href="#捕获错误：" class="headerlink" title="捕获错误："></a>捕获错误：</h3><p>使用try/catch块的try语句将可能出错的代码包含进去。</p>
+<h3 id="处理错误："><a href="#处理错误：" class="headerlink" title="处理错误："></a>处理错误：</h3><p>在try/catch块的catch语句中存在非注释的代码逻辑可以认为错误经过处理。</p>
+<h3 id="不处理错误："><a href="#不处理错误：" class="headerlink" title="不处理错误："></a>不处理错误：</h3><p>与之相反，catch(e) {}内部没有代码逻辑，可以认为错误没有经过处理。</p>
+<h3 id="抛出错误："><a href="#抛出错误：" class="headerlink" title="抛出错误："></a>抛出错误：</h3><p>使用throw语句后跟错误对象，<code>throw new Error(&#39;error message&#39;)</code>或<br><code>throw &#39;error message&#39;</code>。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    大圣
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://nsfi.github.io/blog/2018/06/07/浅谈JavaScript错误/" title="浅谈JavaScript错误">http://nsfi.github.io/blog/2018/06/07/浅谈JavaScript错误/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/javascript/" rel="tag"># javascript</a>
+          
+            <a href="/blog/tags/大圣/" rel="tag"># 大圣</a>
+          
+            <a href="/blog/tags/error/" rel="tag"># error</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2018/03/03/da统计原理分析/" rel="next" title="网站行为统计的基本原理">
+                <i class="fa fa-chevron-left"></i> 网站行为统计的基本原理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/2018/06/25/javascript中call-apply-bind三兄弟/" rel="prev" title="javascript中call,apply,bind三兄弟">
+                javascript中call,apply,bind三兄弟 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">giflee</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/blog/archives/">
+              
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/blog/tags/index.html">
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概念辨析"><span class="nav-number">1.</span> <span class="nav-text">概念辨析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#错误（Error）和异常（Exception）"><span class="nav-number">1.1.</span> <span class="nav-text">错误（Error）和异常（Exception）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#js错误和bug"><span class="nav-number">1.2.</span> <span class="nav-text">js错误和bug</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#js错误："><span class="nav-number">1.2.1.</span> <span class="nav-text">js错误：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#bug："><span class="nav-number">1.2.2.</span> <span class="nav-text">bug：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#javaScript错误发生阶段"><span class="nav-number">2.</span> <span class="nav-text">javaScript错误发生阶段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#错误的几种应对方式"><span class="nav-number">3.</span> <span class="nav-text">错误的几种应对方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#不捕获错误"><span class="nav-number">3.1.</span> <span class="nav-text">不捕获错误</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#捕获错误，不处理，抛出"><span class="nav-number">3.2.</span> <span class="nav-text">捕获错误，不处理，抛出</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#捕获错误，不处理，不抛出"><span class="nav-number">3.3.</span> <span class="nav-text">捕获错误，不处理，不抛出</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#捕获错误，处理"><span class="nav-number">3.4.</span> <span class="nav-text">捕获错误，处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#几个引申出的问题"><span class="nav-number">4.</span> <span class="nav-text">几个引申出的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#不处理错误造成的影响？"><span class="nav-number">4.1.</span> <span class="nav-text">不处理错误造成的影响？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么时候应该捕获错误？"><span class="nav-number">4.2.</span> <span class="nav-text">什么时候应该捕获错误？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么时候应该抛出错误，错误抛出后会怎么样？"><span class="nav-number">4.3.</span> <span class="nav-text">什么时候应该抛出错误，错误抛出后会怎么样？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#错误的重试与恢复"><span class="nav-number">4.4.</span> <span class="nav-text">错误的重试与恢复</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#错误的隔离与降级"><span class="nav-number">4.5.</span> <span class="nav-text">错误的隔离与降级</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#如何上报错误信息到日志服务器"><span class="nav-number">4.5.1.</span> <span class="nav-text">如何上报错误信息到日志服务器</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#名词解释"><span class="nav-number">5.</span> <span class="nav-text">名词解释</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#捕获错误："><span class="nav-number">5.1.</span> <span class="nav-text">捕获错误：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#处理错误："><span class="nav-number">5.2.</span> <span class="nav-text">处理错误：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#不处理错误："><span class="nav-number">5.3.</span> <span class="nav-text">不处理错误：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#抛出错误："><span class="nav-number">5.4.</span> <span class="nav-text">抛出错误：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">网易七鱼</span>
+</div>
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -79,20 +79,20 @@
 
 
 
-<meta name="description" content="网站行为统计最近做了一个营销类的需求，在sdk加入统计的代码，统计用户在网站上的行为（PV，UV，IP等），虽然技术上并没有用到什么可圈可点的技术，但是对于分析实现方面还是有些点值得记录一下的。 相关概念（PV，UV，IP）PV（访问量）即page View，是指当前页面的浏览量或者点击量，页面刷新一次或者重载一次都要+1。 UV（独立访客）即Unique Visitor，是将访问网站的一台客户端">
+<meta name="description" content="javascript中call,apply,bind三兄弟call，apply，bind这三兄弟在日常开发中并不少见，尤其是bind，简直是回调函数绑定this的神器有没有！ 兄弟从哪里来无论是js中原生的函数还是自定义的函数都是可以直接调用这三个兄弟的，为什么可以这么方便，这就不得不得益于javascript的原型大法了。 新建一个Function的实例func，可以在发现console面板里发">
 <meta name="keywords" content="javascript,giflee">
 <meta property="og:type" content="article">
-<meta property="og:title" content="网站行为统计的基本原理">
-<meta property="og:url" content="http://nsfi.github.io/blog/2018/03/03/da统计原理分析/index.html">
+<meta property="og:title" content="javascript中call,apply,bind三兄弟">
+<meta property="og:url" content="http://nsfi.github.io/blog/2018/06/25/javascript中call-apply-bind三兄弟/index.html">
 <meta property="og:site_name" content="网易先知&amp;&amp;网易七鱼前端团队博客">
-<meta property="og:description" content="网站行为统计最近做了一个营销类的需求，在sdk加入统计的代码，统计用户在网站上的行为（PV，UV，IP等），虽然技术上并没有用到什么可圈可点的技术，但是对于分析实现方面还是有些点值得记录一下的。 相关概念（PV，UV，IP）PV（访问量）即page View，是指当前页面的浏览量或者点击量，页面刷新一次或者重载一次都要+1。 UV（独立访客）即Unique Visitor，是将访问网站的一台客户端">
+<meta property="og:description" content="javascript中call,apply,bind三兄弟call，apply，bind这三兄弟在日常开发中并不少见，尤其是bind，简直是回调函数绑定this的神器有没有！ 兄弟从哪里来无论是js中原生的函数还是自定义的函数都是可以直接调用这三个兄弟的，为什么可以这么方便，这就不得不得益于javascript的原型大法了。 新建一个Function的实例func，可以在发现console面板里发">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://user-images.githubusercontent.com/9374871/35213231-e0f4d2a4-ff97-11e7-9522-48fd241c4a3b.jpg">
-<meta property="og:updated_time" content="2018-03-30T08:09:29.000Z">
+<meta property="og:image" content="https://user-images.githubusercontent.com/9374871/34679195-297dff32-f4d0-11e7-97c9-48b71871668e.jpg">
+<meta property="og:updated_time" content="2018-06-25T08:59:34.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="网站行为统计的基本原理">
-<meta name="twitter:description" content="网站行为统计最近做了一个营销类的需求，在sdk加入统计的代码，统计用户在网站上的行为（PV，UV，IP等），虽然技术上并没有用到什么可圈可点的技术，但是对于分析实现方面还是有些点值得记录一下的。 相关概念（PV，UV，IP）PV（访问量）即page View，是指当前页面的浏览量或者点击量，页面刷新一次或者重载一次都要+1。 UV（独立访客）即Unique Visitor，是将访问网站的一台客户端">
-<meta name="twitter:image" content="https://user-images.githubusercontent.com/9374871/35213231-e0f4d2a4-ff97-11e7-9522-48fd241c4a3b.jpg">
+<meta name="twitter:title" content="javascript中call,apply,bind三兄弟">
+<meta name="twitter:description" content="javascript中call,apply,bind三兄弟call，apply，bind这三兄弟在日常开发中并不少见，尤其是bind，简直是回调函数绑定this的神器有没有！ 兄弟从哪里来无论是js中原生的函数还是自定义的函数都是可以直接调用这三个兄弟的，为什么可以这么方便，这就不得不得益于javascript的原型大法了。 新建一个Function的实例func，可以在发现console面板里发">
+<meta name="twitter:image" content="https://user-images.githubusercontent.com/9374871/34679195-297dff32-f4d0-11e7-97c9-48b71871668e.jpg">
 
 
 
@@ -122,13 +122,13 @@
 
 
 
-  <link rel="canonical" href="http://nsfi.github.io/blog/2018/03/03/da统计原理分析/"/>
+  <link rel="canonical" href="http://nsfi.github.io/blog/2018/06/25/javascript中call-apply-bind三兄弟/"/>
 
 
 
 
 
-  <title>网站行为统计的基本原理 | 网易先知&&网易七鱼前端团队博客</title>
+  <title>javascript中call,apply,bind三兄弟 | 网易先知&&网易七鱼前端团队博客</title>
   
 
 
@@ -255,7 +255,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://nsfi.github.io/blog/blog/2018/03/03/da统计原理分析/">
+    <link itemprop="mainEntityOfPage" href="http://nsfi.github.io/blog/blog/2018/06/25/javascript中call-apply-bind三兄弟/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="giflee">
@@ -272,7 +272,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">网站行为统计的基本原理</h2>
+          <h2 class="post-title" itemprop="name headline">javascript中call,apply,bind三兄弟</h2>
         
 
         <div class="post-meta">
@@ -285,8 +285,8 @@
                 <span class="post-meta-item-text">giflee</span>
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-03T00:27:35+08:00">
-                2018-03-03
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-25T16:58:31+08:00">
+                2018-06-25
               </time>
             
 
@@ -329,36 +329,57 @@
       
 
       
-        <h2 id="网站行为统计"><a href="#网站行为统计" class="headerlink" title="网站行为统计"></a>网站行为统计</h2><p>最近做了一个营销类的需求，在sdk加入统计的代码，统计用户在网站上的行为（PV，UV，IP等），虽然技术上并没有用到什么可圈可点的技术，但是对于分析实现方面还是有些点值得记录一下的。</p>
-<h3 id="相关概念（PV，UV，IP）"><a href="#相关概念（PV，UV，IP）" class="headerlink" title="相关概念（PV，UV，IP）"></a>相关概念（PV，UV，IP）</h3><h5 id="PV（访问量）"><a href="#PV（访问量）" class="headerlink" title="PV（访问量）"></a>PV（访问量）</h5><p>即page View，是指当前页面的浏览量或者点击量，页面刷新一次或者重载一次都要+1。</p>
-<h5 id="UV（独立访客）"><a href="#UV（独立访客）" class="headerlink" title="UV（独立访客）"></a>UV（独立访客）</h5><p>即Unique Visitor，是将访问网站的一台客户端作为一个访客来看待，每天0:00-23:59同一个客户端只记一次。页面刷新不会+1</p>
-<h5 id="IP（独立IP）"><a href="#IP（独立IP）" class="headerlink" title="IP（独立IP）"></a>IP（独立IP）</h5><p>即Internet Protocol，独立IP数，每天0:00-23:59同一个IP只记一次。</p>
-<h3 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a>实现原理</h3><p>对比几家卖的好或者卖的不好的流量分析类的产品，百度统计，谷歌统计等，实现方式都是千篇一律的：</p>
-<ul>
-<li>前端客户端负责采集数据，打包整理好待发送的数据</li>
-<li>在合适的时机将数据发送给服务器</li>
-<li>服务器将接受到的数据清洗，整理</li>
-<li>在后台系统中已报表图形的方式呈现出来 </li>
-</ul>
-<h3 id="实现方式"><a href="#实现方式" class="headerlink" title="实现方式"></a>实现方式</h3><p>实现方式主要在于如何最方便的把数据送到服务器这一阶段。目前公认成熟的方案就是通过请求服务器上的一张1x1大小的gif图片的方式请数据发送出去，这就是标题中提到的值得注意或者了解的一些点，例如百度统计gif请求的抓包：<br><img src="https://user-images.githubusercontent.com/9374871/35213231-e0f4d2a4-ff97-11e7-9522-48fd241c4a3b.jpg" alt="3"></p>
-<p>可以看出就是将数据组装好以后，已请求参数的形式请求服务器上的hm.gif图片。</p>
-<h5 id="为什么要请求gif图片"><a href="#为什么要请求gif图片" class="headerlink" title="为什么要请求gif图片"></a>为什么要请求gif图片</h5><p>因为统计的需求就是单方面的将数据发送出去，不需要任何数据的回复，而且统计的sdk绝大部分都是放在第三方的客户的域下的，这就不得不需要解决跨域的问题，然而http对于image类型的文件是没有任何跨域问题的，所以请求一张image图片的方式简直完美适用于这种场景。至于为什么用gif类型的，当然是因为几种类型的图片文件，（png，jpg，gif等）gif最小了。</p>
-<p>至于如何区分是不是独立的访客，第一次请求gif文件的时候，会在客户端写入一份cookie，以后每次请求都会携带这个cookie的值，服务器在清洗数据的时候就可以区分具体访客了。</p>
-<p>现在再来分析下百度统计的实现方式，会在页面进入和页面离开的时候分别去请求一下hm.gif这个文件，并携带和服务器端约定好的参数。</p>
-<h3 id="实现代码"><a href="#实现代码" class="headerlink" title="实现代码"></a>实现代码</h3><p>实现代码也很简单，就是生成一个图片，然后将请求的参数拼好指定给src属性就可以了。</p>
-<pre><code>var loadImage = function(attrs, fn){
-    fn = fn || function(){};
-    var img = new Image();
-    img.onerror = function(){ console.log(&apos;faild to load qa.gif&apos;); };
-    img.onload = function(){ fn(); };
-    img.src = attrs;
-    img.width = 1;
-    img.height = 1;
-    return img;
+        <h1 id="javascript中call-apply-bind三兄弟"><a href="#javascript中call-apply-bind三兄弟" class="headerlink" title="javascript中call,apply,bind三兄弟"></a>javascript中call,apply,bind三兄弟</h1><p>call，apply，bind这三兄弟在日常开发中并不少见，尤其是bind，简直是回调函数绑定this的神器有没有！</p>
+<h3 id="兄弟从哪里来"><a href="#兄弟从哪里来" class="headerlink" title="兄弟从哪里来"></a>兄弟从哪里来</h3><p>无论是js中原生的函数还是自定义的函数都是可以直接调用这三个兄弟的，为什么可以这么方便，这就不得不得益于javascript的原型大法了。</p>
+<p>新建一个Function的实例func，可以在发现console面板里发现call，apply和bind的影子。</p>
+<p><img src="https://user-images.githubusercontent.com/9374871/34679195-297dff32-f4d0-11e7-97c9-48b71871668e.jpg" alt="1"></p>
+<h3 id="call和apply"><a href="#call和apply" class="headerlink" title="call和apply"></a>call和apply</h3><p>call和apply除了接收参数有区别外，在显式绑定this方面是一样的。它们的第一个参数是一个对象，然后再调用函数的时候将this指向这个对象，区别是call的第二个以后的参数是调用函数传入的若干参数，apply第二个参数传入的是一个函数参数组成的数组，ES5以后可以传入一个类数组的对象，例如函数的内置的arguments，NodeList等。</p>
+<p>语法：</p>
+<figure class="highlight plain"><figcaption><span>[c1,c2,c3,c4]);```</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">```func.call(thisObj, c1,c2,c3,c4);</span><br></pre></td></tr></table></figure>
+<p>thisObj的取值有以下几种情况:</p>
+<pre><code>function a(){
+    console.log(this);
 }
-</code></pre><h3 id="可能的坑"><a href="#可能的坑" class="headerlink" title="可能的坑"></a>可能的坑</h3><h5 id="onbeforeunload事件里不能确保异步请求到达"><a href="#onbeforeunload事件里不能确保异步请求到达" class="headerlink" title="onbeforeunload事件里不能确保异步请求到达"></a>onbeforeunload事件里不能确保异步请求到达</h5><p>在web端实现页面进入和离开的分别请求一次gif的时候，很自然的用了onload和onbeforeunload事件，由于之前实现需求定的技术方案比较依赖于离开时请求gif的成功发送（即onbeforeunload事件中异步请求的成功发送，虽然在chrome中用抓包的方式测试大多数请求都是能到达服务器的），但是调研过一些资料，是否能发送到服务器和浏览器，当时网络情况都会有关系，还是不能确保数据必达。</p>
-<p>注：原理上在onbeforeunload中采用同步请求是可以确保请求必达的，但是千万别用（除非真的真的需要），javaScript同步请求绝对很坑。</p>
-<h5 id="移动端没有onbeforeunload事件"><a href="#移动端没有onbeforeunload事件" class="headerlink" title="移动端没有onbeforeunload事件"></a>移动端没有onbeforeunload事件</h5><p>如果网页涉及到mobile web页面的统计，onbeforeunload事件在移动端是无效的，推荐使用pageshow和pagehide事件。</p>
+</code></pre><blockquote>
+<p>thisObj不传，传null或者undefined，this指向window</p>
+</blockquote>
+<p>a.call();          // window</p>
+<p>a.apply();         // window</p>
+<p>a.call(null);         // window</p>
+<p>a.apply(undefined); // window</p>
+<blockquote>
+<p>thisObj传一个函数的名字，this指向这个函数的引用</p>
+</blockquote>
+<pre><code>var b = function(){
+    console.log(&apos;b&apos;)
+}
+</code></pre><p>a.call(b);  // ƒ (){console.log(‘b’)}</p>
+<blockquote>
+<p>thisObj传入一个基本类型，string，boolean类型等，返回基本类型的构造类型</p>
+</blockquote>
+<p>a.call(‘www’) // String {“wew”}</p>
+<p>a.apply(false) // Boolean {false}</p>
+<blockquote>
+<p>thisObj传入一个对象，this指向这个对象</p>
+</blockquote>
+<pre><code>var o = {
+    name: &apos;giflee&apos;
+}
+</code></pre><p>a.apply(o); // {name: “giflee”}</p>
+<h3 id="bind"><a href="#bind" class="headerlink" title="bind"></a>bind</h3><p>bind函数创建了一个新的函数，并将this绑定为传入的第一个参数，此时并不会调用这个函数。</p>
+<p><code>func.bind(thisObj,arg2,arg3,arg4,...)</code></p>
+<p>除了要绑定的thisObj以外，其他的参数都是在新函数被调用之后在实参之前传入到调用方法中。</p>
+<h3 id="日常用法"><a href="#日常用法" class="headerlink" title="日常用法"></a>日常用法</h3><p>由于call和apply的特性，可以灵活运用javaScript中的内置方法来解决一些小问题。</p>
+<p>借助push的行为来拼接两个数组：</p>
+<pre><code>var arr = [1,2,3,4];
+Array.prototype.push.apply(arr,[5,6,7])
+arr   //[1,2,3,4,5,6,7]
+</code></pre><p>利用push的行为，用起来比concat体验更好些。</p>
+<p>找出数组中的最大最小值：</p>
+<pre><code>Math.max.apply(null,[1,2,3,4]);   // 4
+Math.min.apply(null,[1,2,3,4]);   // 1
+</code></pre><p>对一些类数组元素使用一些数组的方法：</p>
+<p>可以通过call和apply对dom的NodeList和函数参数的arguments使用原生的数组方法。</p>
 
       
     </div>
@@ -379,7 +400,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://nsfi.github.io/blog/2018/03/03/da统计原理分析/" title="网站行为统计的基本原理">http://nsfi.github.io/blog/2018/03/03/da统计原理分析/</a>
+    <a href="http://nsfi.github.io/blog/2018/06/25/javascript中call-apply-bind三兄弟/" title="javascript中call,apply,bind三兄弟">http://nsfi.github.io/blog/2018/06/25/javascript中call-apply-bind三兄弟/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -409,8 +430,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/blog/2018/01/29/JavaScript运行机制-事件驱动编程详解/" rel="next" title="JavaScript运行机制:事件驱动编程详解">
-                <i class="fa fa-chevron-left"></i> JavaScript运行机制:事件驱动编程详解
+              <a href="/blog/2018/06/07/浅谈JavaScript错误/" rel="next" title="浅谈JavaScript错误">
+                <i class="fa fa-chevron-left"></i> 浅谈JavaScript错误
               </a>
             
           </div>
@@ -418,10 +439,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/blog/2018/06/07/浅谈JavaScript错误/" rel="prev" title="浅谈JavaScript错误">
-                浅谈JavaScript错误 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -555,7 +572,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#网站行为统计"><span class="nav-number">1.</span> <span class="nav-text">网站行为统计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#相关概念（PV，UV，IP）"><span class="nav-number">1.1.</span> <span class="nav-text">相关概念（PV，UV，IP）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#PV（访问量）"><span class="nav-number">1.1.0.1.</span> <span class="nav-text">PV（访问量）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#UV（独立访客）"><span class="nav-number">1.1.0.2.</span> <span class="nav-text">UV（独立访客）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#IP（独立IP）"><span class="nav-number">1.1.0.3.</span> <span class="nav-text">IP（独立IP）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现原理"><span class="nav-number">1.2.</span> <span class="nav-text">实现原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现方式"><span class="nav-number">1.3.</span> <span class="nav-text">实现方式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#为什么要请求gif图片"><span class="nav-number">1.3.0.1.</span> <span class="nav-text">为什么要请求gif图片</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现代码"><span class="nav-number">1.4.</span> <span class="nav-text">实现代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#可能的坑"><span class="nav-number">1.5.</span> <span class="nav-text">可能的坑</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#onbeforeunload事件里不能确保异步请求到达"><span class="nav-number">1.5.0.1.</span> <span class="nav-text">onbeforeunload事件里不能确保异步请求到达</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#移动端没有onbeforeunload事件"><span class="nav-number">1.5.0.2.</span> <span class="nav-text">移动端没有onbeforeunload事件</span></a></li></ol></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#javascript中call-apply-bind三兄弟"><span class="nav-number">1.</span> <span class="nav-text">javascript中call,apply,bind三兄弟</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#兄弟从哪里来"><span class="nav-number">1.0.1.</span> <span class="nav-text">兄弟从哪里来</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#call和apply"><span class="nav-number">1.0.2.</span> <span class="nav-text">call和apply</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bind"><span class="nav-number">1.0.3.</span> <span class="nav-text">bind</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#日常用法"><span class="nav-number">1.0.4.</span> <span class="nav-text">日常用法</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>
